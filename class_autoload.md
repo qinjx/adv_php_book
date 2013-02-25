@@ -138,10 +138,10 @@ Symfony体积庞大（我们用的ySymfony库文件达10M），调试起来非�
 #### 生产环境性能问题
 生产环境，每一次用户请求时都去扫描目录是不可能的，那太慢了。于是我将所有需要包含的类库文件打包成一个大文件，唤作all_in_one.php，访问每个URL都先包含这个all in one文件。include类库文件的IO开销没有了，却增加了一些PHP引擎解析类库代码的开销，好在有Opcode Cache，kiwiphp在默认加载所有组件和类库的情况下，用ab跑Hello World测试，达到了原生PHP的60%，巧合的是，淘宝主搜索现在也采用了这种打包成一个大文件的方案。
 
-60%是一个漂亮的数字，已经领先ZF和Symfony十倍了，但我还想它更进一步，于是我把上层应用的Controller类文件也打包进来了，每个Controller/method组合（http://example.com/controller/method/）都对应一个独立的conteoller_method.php，这个小改进只是减少了一次IO，带来的性能提升非常有限，却给我造成了大麻烦，因为这样的文件体积都大（都是好几MB），数量又多（10个Controller，每个Controller里10个method就能组合100个了），打包好的conteoller_method.php文件们很快把我的Opcode Cache分配的内存吃完了，apache一启动便崩溃。它的实现代码在这里：http://code.google.com/p/kiwiphp/source/browse/branches/release-0.1/runtime/kiwi.php?spec=svn2&r=2，第264行。
+60%是一个漂亮的数字，已经领先ZF和Symfony十倍了，但我还想它更进一步，于是我把上层应用的Controller类文件也打包进来了，每个Controller/method组合（对应URL`http://example.com/controller/method/`）都对应一个独立的conteoller_method.php，这个小改进只是减少了一次IO，带来的性能提升非常有限，却给我造成了大麻烦，因为这样的文件体积都大（都是好几MB），数量又多（10个Controller，每个Controller里10个method就能组合100个了），打包好的conteoller_method.php文件们很快把我的Opcode Cache分配的内存吃完了，apache一启动便崩溃。它的实现代码在这里：http://code.google.com/p/kiwiphp/source/browse/branches/release-0.1/runtime/kiwi.php?spec=svn2&r=2 第264行。
 
 ### 第三阶段：PHP5 __autoload()
-前文说到，黑白名单功能推出后，同行的批评让我发现了PHP5内置了autoload机制，这让我如获至宝，有了它，便可以实现真正的按需加载，即使用户引用的第三方类库有1万个类文件也不怕，用到哪类的时候就加载哪个类。于是，2009年8月，Kiwiphp正式改用PHP5内置的autoload机制（http://code.google.com/p/kiwiphp/source/detail?r=236&path=/trunk/runtime/kiwi.php）。
+前文说到，黑白名单功能推出后，同行的批评让我发现了PHP5内置了autoload机制，这让我如获至宝，有了它，便可以实现真正的按需加载，即使用户引用的第三方类库有1万个类文件也不怕，用到哪类的时候就加载哪个类。于是，2009年8月，Kiwiphp正式改用PHP5内置的autoload机制：http://code.google.com/p/kiwiphp/source/detail?r=236&path=/trunk/runtime/kiwi.php
 
 kiwiphp虽然可以自动加载其它第三方类库，以一种兼容并包的姿态出现了，但给使用者的自由还不够彻底，一方面Autoloader功能是集成在kiwi.php文件里面的，使用者没有办法只用kiwiphp的autoloader而不用其它诸如MVC的组件；另一方面各个组件对Kiwi核心类和Config有藕断丝连的依赖，或者要调用核心类的方法，或者有的变量是在核心类里初始化的。在采用PHP5内置的autoload方法的同一个月，我决心让kiwiphp的使用者感受到更彻底的自由，不仅kiwiphp可以加载其它框架的类，其它框架也可以随意使用kiwiphp的组件，让各个组件都可以单独被使用者下载使用。这是一次脱胎换骨的升级，我将它改名为lotusphp，自动加载机制没变，但实现细节又经历了几百次修订（SVN revision）。
 
@@ -171,7 +171,7 @@ kiwiphp虽然可以自动加载其它第三方类库，以一种兼容并包的�
 		}//end while
 	}//end function
 
-完整代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975，第255行
+完整代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975  第255行
 
 #### 源代码解析
 欲知一个PHP文件中定义了哪些类库，一种方法是正规表达式匹配，另外一种是用Tokenizer。
@@ -186,7 +186,7 @@ kiwiphp虽然可以自动加载其它第三方类库，以一种兼容并包的�
 		$_classes[$class] = $currentFile;
 	}
 
-完整代码参见：http://code.google.com/p/kiwiphp/source/browse/trunk/runtime/kiwi.php?r=2，第112行
+完整代码参见：http://code.google.com/p/kiwiphp/source/browse/trunk/runtime/kiwi.php?r=2  第112行
 
 正则表达式匹配的优缺点如下：
 
@@ -217,7 +217,7 @@ kiwiphp虽然可以自动加载其它第三方类库，以一种兼容并包的�
 		}
 	}
 
-完整代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975，第315行
+完整代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第315行
 
 Tokenizer的方法优优缺点正好与正则表达式方法相反：
 
@@ -230,7 +230,7 @@ Tokenizer的方法优优缺点正好与正则表达式方法相反：
 
 Lotusphp autoloader有一个public成员变量$devMode，默认值是true，使用者在非开发环境部署时将其赋值为false，便可自动实现性能优化。
 
-详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975，第71行，第103行。
+详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第71行，第103行。
 
 ##### 非开发环境性能优化
 非开发环境只有在运维人员主动安装部署应用的时候，才需要重新扫描，可将这个扫描结果缓存起来，有安装部署动作发生时，将这个缓存清空。
@@ -291,7 +291,7 @@ Tokenizer分析非常消耗CPU时间， 一个数百行的文件，token_get_all
 		//token cache not available
 	}
 
-详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975，第424行
+详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第424行
 
 其实，只判断文件Hash值几乎能确定文件是否改变过了，但考虑到Hash也有极小的碰撞概率（比一个人连中10次500万彩票大奖的几率还小吧），增加了文件大小比对，这样就万无一失了。过了几天，我又将md5换成了crc32，因为文件大小相同内容不同的文件，碰撞出相同crc32 checksum的可能性几乎不存在，crc32的运算速度比md5略快一点，详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=976，第422行。
 
