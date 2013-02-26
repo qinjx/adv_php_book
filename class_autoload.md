@@ -171,7 +171,7 @@ kiwiphp虽然可以自动加载其它第三方类库，以一种兼容并包的�
 		}//end while
 	}//end function
 
-完整代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975  第255行
+完整代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第255行
 
 #### 源代码解析
 欲知一个PHP文件中定义了哪些类库，一种方法是正规表达式匹配，另外一种是用Tokenizer。
@@ -186,7 +186,7 @@ kiwiphp虽然可以自动加载其它第三方类库，以一种兼容并包的�
 		$_classes[$class] = $currentFile;
 	}
 
-完整代码参见：http://code.google.com/p/kiwiphp/source/browse/trunk/runtime/kiwi.php?r=2  第112行
+完整代码参见：http://code.google.com/p/kiwiphp/source/browse/trunk/runtime/kiwi.php?r=2 第112行
 
 正则表达式匹配的优缺点如下：
 
@@ -230,7 +230,7 @@ Tokenizer的方法优优缺点正好与正则表达式方法相反：
 
 Lotusphp autoloader有一个public成员变量$devMode，默认值是true，使用者在非开发环境部署时将其赋值为false，便可自动实现性能优化。
 
-详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第71行，第103行。
+详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第71行 第103行。
 
 ##### 非开发环境性能优化
 非开发环境只有在运维人员主动安装部署应用的时候，才需要重新扫描，可将这个扫描结果缓存起来，有安装部署动作发生时，将这个缓存清空。
@@ -293,7 +293,7 @@ Tokenizer分析非常消耗CPU时间， 一个数百行的文件，token_get_all
 
 详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第424行
 
-其实，只判断文件Hash值几乎能确定文件是否改变过了，但考虑到Hash也有极小的碰撞概率（比一个人连中10次500万彩票大奖的几率还小吧），增加了文件大小比对，这样就万无一失了。过了几天，我又将md5换成了crc32，因为文件大小相同内容不同的文件，碰撞出相同crc32 checksum的可能性几乎不存在，crc32的运算速度比md5略快一点，详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=976，第422行。
+其实，只判断文件Hash值几乎能确定文件是否改变过了，但考虑到Hash也有极小的碰撞概率（比一个人连中10次500万彩票大奖的几率还小吧），增加了文件大小比对，这样就万无一失了。过了几天，我又将md5换成了crc32，因为文件大小相同内容不同的文件，碰撞出相同crc32 checksum的可能性几乎不存在，crc32的运算速度比md5略快一点，详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=976 第422行。
 
 Tokenizer分析结果缓存是开发环境最重要的性能优化措施，做完它之后，日常开发中每次刷新页面就能控制在1秒以内完成了，可以接受了。
 
