@@ -230,7 +230,7 @@ Tokenizer的方法优优缺点正好与正则表达式方法相反：
 
 Lotusphp autoloader有一个public成员变量$devMode，默认值是true，使用者在非开发环境部署时将其赋值为false，便可自动实现性能优化。
 
-详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第71行 第103行。
+详细代码参见：http://code.google.com/p/lotusphp/source/browse/trunk/runtime/Autoloader/Autoloader.php?r=975 第71行及第103行。
 
 ##### 非开发环境性能优化
 非开发环境只有在运维人员主动安装部署应用的时候，才需要重新扫描，可将这个扫描结果缓存起来，有安装部署动作发生时，将这个缓存清空。
