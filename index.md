@@ -13,6 +13,8 @@
 #### 嵌入式语言
 ##### PostgreSQL plphp
 
+#### Hadoop MapReduce
+
 ### 编辑器和IDE
 #### Vim
 #### Sublime Text
@@ -31,6 +33,7 @@
 #### KCacheGrind for Linux/Mac OS
 #### MacCallGrind for Mac OS
 #### WebGrind for All
+#### XHprof
 
 ### 单元测试
 #### PHPUnit
