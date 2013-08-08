@@ -1,5 +1,6 @@
-# 细说“PHP类库自动加载”
-By *覃健祥（Qin Jianxiang, Author of Lotusphp）2013.1*
+细说“PHP类库自动加载”
+==================
+作者： *覃健祥*（Qin Jianxiang, Author of Lotusphp）2013年1月
 
 * 注1：文档中涉及的国内外框架，我只在2006年-2008年粗浅地看过文档，做过Hello World基准性能测试（CakePHP，Solar，Yii，QeePHP，ThinkPHP），用其中少数几个实际做过项目（CodeIgniter，Zend Framework，Symfony），我对它们的自动加载技术的评述也是以当年版本为基础的。时过境迁，有不少框架的代码发生了翻天覆地的变化，观众朋友请不要将这个文档作为你选择框架的依据。
 
