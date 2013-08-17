@@ -370,4 +370,15 @@ Autoloader.php中：根据autoloadPath计算storeHandle的prefix、判断devMode
 
 要把Lotusphp Autoloader全部的功能用C实现一遍，代码量还是有一点的，我们用C实现的初衷是“非开发环境”的易部署和高性能，可以考虑最复杂的扫描文件部分还是保留纯PHP代码，用类似spl_autoload_register的机制或者php.ini设置把PHP实现关联到C扩展指针上去，让autoloader C扩展在需要扫描文件的时候（如php进程重启的时候）来调用php实现的扫描方法。
 
+#### 做成PHP扩展会遇到的问题点
+##### 多App的Action类名冲突问题
+假设一个基于lotusphp的项目，有多个app，每个app的默认action可能都是default/index。多个app运行在同一台机器上，这就会出现类名冲突。
 
+使用其它框架也会遇到类似的问题。如上文所述，Autoloader扩展只在PHP进程启动时（即放在MINIT中）初始化class file mapping，多个app的重名class会互相覆盖。解决方法有：
+
+- app中保证类名不重复。这要求框架支持自定义router规则，改变默认module和action的名字；同时也对app代码有要求。
+- app中使用namespace，虽然短类名仍然重复，但加上了namespace的完整类名不重复了。lotusphp的autoloader暂还不支持namespace，需进一步测试来验证
+- Autoloader扩展中保存多份mapping数据，暴露一个php function给php代码，允许php应用指定使用哪份mapping数据。这样做对应用的代码有侵入（虽然比上面两种方法对应用代码要求更小），也提高了扩展的复杂度（比如要考虑共享变量的安全，app_1指定了使用mapping_1的数据，不能影响app_2）
+- app的action、component不使用Autoloader扩展加载。在MINIT方法里把Autoloader扩展的autoload方法用spl_autoload_register机制注册成第一个执行的autoload方法，遇到重名加载不了的app类，再由php自己注册的autoload方法加载。这个方法兼容任何框架，且对应用代码无侵入。
+- app的action、component使用MVC自带的文件寻址机制加载，不使用自动加载。这个方法对MVC有一定要求，性能比自动载略差。
+- 将同一个project的不同app部署到不同的机器（物理机或虚拟机都可以）上，杜绝类重名问题，这个方法对扩展和应用代码都没有要求，兼容性最好，只需要运维部署时解决。
