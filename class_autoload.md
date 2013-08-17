@@ -110,6 +110,8 @@ autoload方法接受一个参数：类名，然后根据类名找到类文件路
 
 这种方法完美地解决了“目录名和文件名变化引起程序代码变化”问题。由于类名和路径无关，采用这种方案的autoloader/框架可以加载任何第三方类库。
 
+class file mapping的方案和通过类名计算文件路径的方案相比，还有一点不足：在非开发环境，因性能优化需要而缓存class file mapping，这时如果有新的class被加了进来，需要清除缓存才能生效。而根据类名计算文件路径就不需要缓存任何东西了，不存在这个问题。幸运的是，增加新的class一般只有在新版产品发布时才发生，这时候清除一下缓存也是可以接受的。
+
 ## 自动加载案例详解：Lotusphp Autoloader
 Lotusphp是我开发的一个PHP框架，它非常简洁（截至2013年1月，不算单元测试，一共才4000多行代码），最初是为我创立的公司快速开发而设计的，那时候它叫kiwiphp，我进Yahoo！ CN后正式开源，就把它改造成门户级框架了，它的松散耦合、分布式存储三剑客（db、cache、search--开发中）、高性能（测试return true的web app，QPS可达原生PHP的60%，超过国内外所有PHP框架）都是源自这个门户级初衷。
 
@@ -367,3 +369,5 @@ Autoloader.php中：根据autoloadPath计算storeHandle的prefix、判断devMode
 做成PHP扩展后，这些操作只需要在php进程（apache mod_php或者php fast_cgi）启动的时候执行，不需要每次HTTP请求都执行上面这些操作。mapping数组可以直接放在内存里，也不必依赖opcode cache了。
 
 要把Lotusphp Autoloader全部的功能用C实现一遍，代码量还是有一点的，我们用C实现的初衷是“非开发环境”的易部署和高性能，可以考虑最复杂的扫描文件部分还是保留纯PHP代码，用类似spl_autoload_register的机制或者php.ini设置把PHP实现关联到C扩展指针上去，让autoloader C扩展在需要扫描文件的时候（如php进程重启的时候）来调用php实现的扫描方法。
+
+
